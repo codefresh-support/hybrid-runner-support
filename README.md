@@ -1,5 +1,12 @@
 # Creating a Support Package for Venona
 
+## PreReqs
+
+1. Kubernetes context must be configured to cluster running Venona.
+1. [Codefresh CLI](https://codefresh-io.github.io/cli/installation/) must be installed and configured.
+
+## Script Usage
+
 Script for gathering up details on Venona "Codefresh Runner" for support ticket
 
 You may need to chmod +x to run.
