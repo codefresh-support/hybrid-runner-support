@@ -18,6 +18,10 @@ echo "Changing to temp directory"
 
 cd codefresh/support_package_temp/$NOW
 
+echo "Exporting Node Descriptions"
+
+kubectl describe nodes > kube-node-descriptions-$NOW.txt
+
 echo "Exporting Pod List"
 
 kubectl get pods -n $NAMESPACE > kube-pod-list-$NOW.txt
