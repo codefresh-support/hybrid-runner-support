@@ -10,11 +10,11 @@ NAMESPACE=$2
 
 NOW=$(date '+%Y%m%d%H%M%S')
 
-echo "Creating Support Directory"
+echo "Creating codefresh directory"
 
 mkdir -p codefresh/support_package_temp/$NOW
 
-echo "Changing to Temp Directory"
+echo "Changing to temp directory"
 
 cd codefresh/support_package_temp/$NOW
 
@@ -22,11 +22,15 @@ echo "Exporting Pod List"
 
 kubectl get pods -n $NAMESPACE > kube-pod-list-$NOW.txt
 
-echo "Exporting pod logs"
+echo "Exporting Pod Descriptions"
 
-kubectl logs -n $NAMESPACE $(kubectl get pods -n $NAMESPACE -l app=venona --no-headers -o custom-columns=":metadata.name") > kube-venona-log-$NOW.log
-kubectl logs -n $NAMESPACE $(kubectl get pods -n $NAMESPACE -l app=dind --no-headers -o custom-columns=":metadata.name") > kube-venona-log-$NOW.log
-kubectl logs -n $NAMESPACE $(kubectl get pods -n $NAMESPACE -l app=runtime --no-headers -o custom-columns=":metadata.name") > kube-venona-log-$NOW.log
+kubectl describe pods -n $NAMESPACE > kube-pod-descriptions-$NOW.txt
+
+echo "Exporting Pod Logs"
+
+kubectl logs -n $NAMESPACE $(kubectl get pods -n $NAMESPACE -l app=venona --no-headers -o custom-columns=":metadata.name") > kube-venona-log-$NOW.log || echo "venona pod not found!"
+kubectl logs -n $NAMESPACE $(kubectl get pods -n $NAMESPACE -l app=dind --no-headers -o custom-columns=":metadata.name") > kube-venona-log-$NOW.log || echo "did pod not found!"
+kubectl logs -n $NAMESPACE $(kubectl get pods -n $NAMESPACE -l app=runtime --no-headers -o custom-columns=":metadata.name") > kube-venona-log-$NOW.log || echo "engine Pod not found!"
 echo "Exporting Codefresh Runtime"
 
 codefresh get runtime-environment $RUNTIME -o json > cf-runtime-$NOW.json
