@@ -32,9 +32,16 @@ kubectl describe pods -n $NAMESPACE > kube-pod-descriptions-$NOW.txt
 
 echo "Exporting Pod Logs"
 
-kubectl logs -n $NAMESPACE $(kubectl get pods -n $NAMESPACE -l app=venona --no-headers -o custom-columns=":metadata.name") > kube-venona-log-$NOW.log || echo "venona pod not found!"
-kubectl logs -n $NAMESPACE $(kubectl get pods -n $NAMESPACE -l app=dind --no-headers -o custom-columns=":metadata.name") > kube-dind-log-$NOW.log || echo "did pod not found!"
-kubectl logs -n $NAMESPACE $(kubectl get pods -n $NAMESPACE -l app=runtime --no-headers -o custom-columns=":metadata.name") > kube-runtime-log-$NOW.log || echo "engine Pod not found!"
+mkdir pod-logs
+
+kubectl logs -n $NAMESPACE $(kubectl get pods -n $NAMESPACE -l app=venona --no-headers -o custom-columns=":metadata.name") > pod-logs/kube-venona-log-$NOW.log || echo "venona pod not found!"
+kubectl logs -n $NAMESPACE $(kubectl get pods -n $NAMESPACE -l app=dind --no-headers -o custom-columns=":metadata.name") > pod-logs/kube-dind-log-$NOW.log || echo "did pod not found!"
+kubectl logs -n $NAMESPACE $(kubectl get pods -n $NAMESPACE -l app=runtime --no-headers -o custom-columns=":metadata.name") > pod-logs/kube-runtime-log-$NOW.log || echo "engine Pod not found!"
+kubectl logs -n $NAMESPACE $(kubectl get pods -n $NAMESPACE -l app=dind-lv-monitor --no-headers -o custom-columns=":metadata.name") > pod-logs/kube-dind-lv-monitor-log-$NOW.log || echo "engine Pod not found!"
+kubectl logs -n $NAMESPACE $(kubectl get pods -n $NAMESPACE -l app=dind-volume-provisioner --no-headers -o custom-columns=":metadata.name") > pod-logs/kube-dind-volume-provisioner-$NOW.log || echo "venona pod not found!"
+kubectl logs -n $NAMESPACE $(kubectl get pods -n $NAMESPACE -l app=monitor --no-headers -o custom-columns=":metadata.name") > pod-logs/kube-monitor-log-$NOW.log || echo "venona pod not found!"
+kubectl logs -n $NAMESPACE $(kubectl get pods -n $NAMESPACE -l app=runner --no-headers -o custom-columns=":metadata.name") > pod-logs/kube-runner-log-$NOW.log || echo "venona pod not found!"
+
 echo "Exporting Codefresh Runtime"
 
 codefresh get runtime-environment $RUNTIME -o json > cf-runtime-$NOW.json
