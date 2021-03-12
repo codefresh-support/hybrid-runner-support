@@ -10,8 +10,6 @@
 
 This script is to gather information about the Codefresh Runner (previously Venona) environment.  
 
-> NOTE: This will gather information for all pods in the namespace you specified.
-
 ### Setup
 
 To begin, you will need to clone the repo, change the directory to this repo, and add execution flag to the script.  Below is the command to do it all in one go.
