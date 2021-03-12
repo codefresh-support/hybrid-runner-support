@@ -51,9 +51,9 @@ kubectl get storageclass $STORAGE_CLASS -o yaml >> kube-cf-storageclass-$NOW.yam
 
 echo "Archiving Contents and cleaning up"
 cd ../..
-tar -czvf codefresh-support-$NOW.tar.gz codefresh/$NOW
-rm -rf codefresh/
+tar -czvf codefresh/codefresh-support-$NOW.tar.gz codefresh/$NOW
+rm -rf codefresh/$NOW
 
-echo "New Tar Package: codefresh/codefresh-support-$NOW.tar.gz "
+echo "New Tar Package: codefresh/codefresh-support-$NOW.tar.gz"
 
 echo "Please attach .tar.gz to your support ticket"
