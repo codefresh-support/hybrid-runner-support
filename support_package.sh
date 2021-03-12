@@ -4,38 +4,74 @@
 RUNTIME=$1
 
 # Set Kubernetes Namespace
-NAMESPACE=$2
+NAMESPACE1=$2
+
+if [ -n "$3" ]; then
+  NAMESPACE2=$3
+else
+  echo "Only 1 namespace provided"
+fi
 
 # Set Date in tha year month day hour minutes seconds
 NOW=$(date '+%Y%m%d%H%M%S')
+
+# setting work directory
 
 echo "Creating Codefresh temp directory"
 mkdir -p codefresh/$NOW
 cd codefresh/$NOW
 
+# getting node information
+
 echo "Exporting Nodes Descriptions"
 kubectl describe nodes >> node-describe.txt
 
-echo "Gather Pod information in the $NAMESPACE namespace"
-kubectl get pods -n $NAMESPACE -o wide >> pod-list.txt
+# First Namespace
 
-for POD in $(kubectl get pods -n $NAMESPACE --no-headers -o custom-columns=":metadata.name")
+echo "Exporting Deployments in the $NAMESPACE1 namespace"
+kubectl get deployments -n $NAMESPACE1 -o yaml >> cf-deployments-$NAMESPACE1.yaml
+
+echo "Gather Pod information in the $NAMESPACE1 namespace"
+kubectl get pods -n $NAMESPACE1 -o wide >> pod-list-$NAMESPACE1.txt
+
+for POD in $(kubectl get pods -n $NAMESPACE1 -l 'app in (dind, dind-lv-monitor, dind-volume-provisioner, runtime, monitor, runner)' --no-headers -o custom-columns=":metadata.name")
 do
   mkdir $POD
-  kubectl get pods $POD -n $NAMESPACE -o yaml >> $POD/get.yaml
-  kubectl describe pods $POD -n $NAMESPACE >> $POD/describe.txt
-  kubectl logs $POD -n $NAMESPACE >> $POD/logs.log
+  kubectl get pods $POD -n $NAMESPACE1 -o yaml >> $POD/get.yaml
+  kubectl describe pods $POD -n $NAMESPACE1 >> $POD/describe.txt
+  kubectl logs $POD -n $NAMESPACE1 --all-containers >> $POD/logs.log
 done
+
+# Second Namespace
+
+if [ -n "$NAMESPACE2" ]; then
+  echo "Exporting Deployments in the $NAMESPACE2 namespace"
+  kubectl get deployments -n $NAMESPACE2 -o yaml >> cf-deployments-$NAMESPACE2.yaml
+
+  echo "Gather Pod information in the $NAMESPACE2 namespace"
+  kubectl get pods -n $NAMESPACE2 -o wide >> pod-list-$NAMESPACE2.txt
+
+  for POD in $(kubectl get pods -n $NAMESPACE2 -l 'app in (dind, dind-lv-monitor, dind-volume-provisioner, runtime, monitor, runner)' --no-headers -o custom-columns=":metadata.name")
+  do
+    mkdir $POD
+    kubectl get pods $POD -n $NAMESPACE2 -o yaml >> $POD/get.yaml
+    kubectl describe pods $POD -n $NAMESPACE2 >> $POD/describe.txt
+    kubectl logs $POD -n $NAMESPACE2 --all-containers >> $POD/logs.log
+  done
+else
+  echo "Only 1 namespace provided"
+fi
+
+# runtime and storage class
 
 echo "Exporting Codefresh Runtime"
 codefresh get runtime-environment $RUNTIME -o json >> cf-runtime.json
 
-echo "Exporting Deployments"
-kubectl get deployments -n $NAMESPACE -o yaml >> cf-deployments.yaml
-
 echo "Exporting Storage Class"
 STORAGE_CLASS=$(jq .dockerDaemonScheduler.pvcs.dind.storageClassName cf-runtime.json | sed 's/"//g')
 kubectl get storageclass $STORAGE_CLASS -o yaml >> cf-storageclass.yaml
+
+# compressing and cleaning up
 
 echo "Archiving Contents and cleaning up"
 cd ../..

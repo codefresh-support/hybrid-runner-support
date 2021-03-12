@@ -23,15 +23,21 @@ chmod +x support_package.sh
 ### Syntax
 
 ```bash
-./support_package.sh "Codefresh/Runtime" Codefresh-Namespace
+./support_package.sh "Codefresh/Runtime" Namespace-1 Namespace-2
 ```
 
 The 1st argument is the runtime name. You can run `codefresh get runtime-environments` to get the runtimes.
 
 > NOTE: make sure the runtime name is in `""` because of the `/` character.
 
-The 2nd argument is the Kubernetes namespace where you installed the Codefresh Runner.
+The 2nd and 3rd argument is the Kubernetes Namespace where the Codefresh Runner is in. Only 1 Namespace is required.
 
 Example:
 
-`./support_package.sh "sales-dev-eks/codefresh-runtime" codefresh-namespace`
+```
+./support_package.sh "sales-dev-eks/codefresh-runtime" codefresh-namespace
+```
+
+```
+./support_package.sh "sales-dev-eks/codefresh-runtime" codefresh-namespace codefresh-2-namespace
+```
