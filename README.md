@@ -3,20 +3,41 @@
 ## PreReqs
 
 1. Kubernetes context must be configured to cluster running Codefresh runner.
-1. [Codefresh CLI](https://codefresh-io.github.io/cli/installation/) must be installed and configured.
+2. [Codefresh CLI](https://codefresh-io.github.io/cli/installation/) must be installed and configured.
+3. git (can download a zip version instead)
 
 ## Script Usage
 
-Script for gathering up details on Codefresh Runner (previously Venona) for support ticket
+This script is to gather information about the Codefresh Runner (previously Venona) environment.  
 
-You may need to chmod +x to run.
+### Setup
 
-The 1st argument is your runtime name from `codefresh get runtime-environments`.
+To begin, you will need to clone the repo, change the directory to this repo, and add execution flag to the script.  Below is the command to do it all in one go.
 
-* Please make sure you add double quotes around the runtime name due to `/` character.
+```bash
+git clone https://github.com/codefresh-contrib/venona-support.git && \
+cd venona-support && \
+chmod +x support_package.sh
+```
 
-The 2nd argument is the Kubernetes namespace where you installed your runner.
+### Syntax
+
+```bash
+./support_package.sh "Codefresh/Runtime" Namespace-1 Namespace-2
+```
+
+The 1st argument is the runtime name. You can run `codefresh get runtime-environments` to get the runtimes.
+
+> NOTE: make sure the runtime name is in `""` because of the `/` character.
+
+The 2nd and 3rd argument is the Kubernetes Namespace where the Codefresh Runner is in. Only 1 Namespace is required.
 
 Example:
 
-`./support_package.sh "sales-dev-eks/codefresh-runtime" codefresh-runtime`
+```
+./support_package.sh "sales-dev-eks/codefresh-runtime" codefresh-namespace
+```
+
+```
+./support_package.sh "sales-dev-eks/codefresh-runtime" codefresh-namespace codefresh-2-namespace
+```
