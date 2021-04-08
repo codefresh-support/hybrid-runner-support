@@ -2,6 +2,7 @@
 
 # Set Runtime Name
 RUNTIME=$1
+NAMESPACE2=$2
 
 # Set Date in tha year month day hour minutes seconds
 NOW=$(date '+%Y%m%d%H%M%S')
@@ -43,6 +44,26 @@ do
   done
 
 done
+
+if [ -n "$NAMESPACE2" ]; then
+
+  mkdir $NAMESPACE
+
+  echo "Exporting Deployments in the $NAMESPACE2 namespace"
+  kubectl get deployments -n $NAMESPACE2 -o yaml >> $NAMESPACE2/cf-deployments-$NAMESPACE2.yaml
+
+  echo "Gather Pod information in the $NAMESPACE2 namespace"
+  kubectl get pods -n $NAMESPACE2 -o wide >> $NAMESPACE2/pod-list.txt
+
+  for POD in $(kubectl get pods -n $NAMESPACE2 -l 'app in (dind, dind-lv-monitor, dind-volume-provisioner, runtime, monitor, runner)' --no-headers -o custom-columns=":metadata.name")
+  do
+    mkdir $NAMESPACE2/$POD
+    kubectl get pods $POD -n $NAMESPACE2 -o yaml >> $NAMESPACE2/$POD/get.yaml
+    kubectl describe pods $POD -n $NAMESPACE2 >> $NAMESPACE2/$POD/describe.txt
+    kubectl logs $POD -n $NAMESPACE2 --all-containers >> $NAMESPACE2/$POD/logs.log
+  done
+fi
+
 
 # compressing and cleaning up
 echo "Archiving Contents and cleaning up"

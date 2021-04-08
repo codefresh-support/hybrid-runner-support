@@ -2,8 +2,9 @@
 
 ## PreReqs
 
-1. Kubernetes context must be configured to cluster running Codefresh runner.
-2. [Codefresh CLI](https://codefresh-io.github.io/cli/installation/) must be installed and configured.
+1. `kubectl config current-context` must be the context of the cluster the runner is located in
+2. [Codefresh CLI](https://codefresh-io.github.io/cli/installation/) must be installed and configured
+3. jq (used to gather information)
 3. git (can download a zip version instead)
 
 ## Script Usage
@@ -23,21 +24,21 @@ chmod +x support_package.sh
 ### Syntax
 
 ```bash
-./support_package.sh "Codefresh/Runtime" Namespace-1 Namespace-2
+./support_package.sh "Codefresh/Runtime" AGENT-NAMESPACE
 ```
 
 The 1st argument is the runtime name. You can run `codefresh get runtime-environments` to get the runtimes.
 
 > NOTE: make sure the runtime name is in `""` because of the `/` character.
 
-The 2nd and 3rd argument is the Kubernetes Namespace where the Codefresh Runner is in. Only 1 Namespace is required.
+The 2nd is the Kubernetes Namespace where the Codefresh Agent is located. Only use if it is in a different namespace than the runtime environment. The AGENT-NAMESPACE argument is not required.
 
 Example:
 
-```
-./support_package.sh "sales-dev-eks/codefresh-runtime" codefresh-namespace
+```bash
+./support_package.sh "sales-dev-eks/codefresh-runtime"
 ```
 
-```
-./support_package.sh "sales-dev-eks/codefresh-runtime" codefresh-namespace codefresh-2-namespace
+```bash
+./support_package.sh "sales-dev-eks/codefresh-runtime" codefresh-namespace
 ```
