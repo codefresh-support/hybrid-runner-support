@@ -47,7 +47,7 @@ done
 
 if [ -n "$NAMESPACE2" ]; then
 
-  mkdir $NAMESPACE
+  mkdir $NAMESPACE2
 
   echo "Exporting Deployments in the $NAMESPACE2 namespace"
   kubectl get deployments -n $NAMESPACE2 -o yaml >> $NAMESPACE2/cf-deployments-$NAMESPACE2.yaml
