@@ -17,7 +17,7 @@ echo "Exporting Nodes Descriptions"
 kubectl describe nodes >> nodes.txt
 
 # getting RE information
-for RENV in $(codefresh get agents --sc runtimes | grep $RUNTIME | sed -e $'s/,/\\\n/g')
+for RENV in $(codefresh get agents --sc runtimes | grep $RUNTIME)
 do
   NAMESPACE=$(codefresh get runtime-environments $RENV -o json | jq --raw-output '.dockerDaemonScheduler.cluster.namespace')
   mkdir $NAMESPACE
@@ -32,15 +32,42 @@ do
   echo "Exporting Deployments in the $NAMESPACE namespace"
   kubectl get deployments -n $NAMESPACE -o yaml >> $NAMESPACE/cf-deployments.yaml
 
+  echo "Gather Events for $NAMESPACE namespace"
+  kubectl get events -n $NAMESPACE --sort-by=.metadata.creationTimestamp >> $NAMESPACE/events.txt
+
+  echo "Gather PVC list for $NAMESPACE namespace"
+  kubectl get pvc -n $NAMESPACE -o wide >> $NAMESPACE/pvc-list.txt
+
+  echo "Gather PV list for $NAMESPACE namespace"
+  kubectl get pv -l pod_namespace=$NAMESPACE >> $NAMESPACE/pv-list.txt
+
   echo "Gather Pod information in the $NAMESPACE namespace"
   kubectl get pods -n $NAMESPACE -o wide >> $NAMESPACE/pod-list.txt
 
-  for POD in $(kubectl get pods -n $NAMESPACE -l 'app in (dind, dind-lv-monitor, dind-volume-provisioner, runtime, monitor, runner)' --no-headers -o custom-columns=":metadata.name")
+  for POD in $(kubectl get pods -n $NAMESPACE -l 'app in (app-proxy, dind, dind-lv-monitor, dind-volume-provisioner, dind-volume-cleanup, runtime, runner, monitor)' --no-headers -o custom-columns=":metadata.name")
   do
     mkdir $NAMESPACE/$POD
     kubectl get pods $POD -n $NAMESPACE -o yaml >> $NAMESPACE/$POD/get.yaml
     kubectl describe pods $POD -n $NAMESPACE >> $NAMESPACE/$POD/describe.txt
     kubectl logs $POD -n $NAMESPACE --all-containers >> $NAMESPACE/$POD/logs.log
+  done
+
+  runtime_env=$(echo $RENV | sed -e 's/\//-/g') #get runtime label
+
+  echo "Gather PVC information in the $NAMESPACE namespace"
+  for PVC in $(kubectl get pvc -n $NAMESPACE -l 'codefresh-app=dind' -l runtime_env=$runtime_env --no-headers -o custom-columns=":metadata.name")
+  do
+    mkdir $NAMESPACE/$PVC
+    kubectl get pvc $PVC -n $NAMESPACE -o yaml >> $NAMESPACE/$PVC/get.yaml
+    kubectl describe pvc $PVC -n $NAMESPACE >> $NAMESPACE/$PVC/describe.txt
+  done
+
+  echo "Gather PV information in the $NAMESPACE namespace"
+  for PV in $(kubectl get pv -l 'codefresh-app=dind' -l pod_namespace=$NAMESPACE -l runtime_env=$runtime_env --no-headers -o custom-columns=":metadata.name")
+  do
+    mkdir $NAMESPACE/$PV
+    kubectl get pv $PV -o yaml >> $NAMESPACE/$PV/get.yaml
+    kubectl describe pv $PV >> $NAMESPACE/$PV/describe.txt
   done
 
 done
@@ -55,15 +82,45 @@ if [ -n "$NAMESPACE2" ]; then
   echo "Gather Pod information in the $NAMESPACE2 namespace"
   kubectl get pods -n $NAMESPACE2 -o wide >> $NAMESPACE2/pod-list.txt
 
-  for POD in $(kubectl get pods -n $NAMESPACE2 -l 'app in (dind, dind-lv-monitor, dind-volume-provisioner, runtime, monitor, runner)' --no-headers -o custom-columns=":metadata.name")
+  echo "Gather Events for $NAMESPACE2 namespace"
+  kubectl get events -n $NAMESPACE2 --sort-by=.metadata.creationTimestamp >> $NAMESPACE2/events.txt
+
+  echo "Gather PVC list for $NAMESPACE2 namespace"
+  kubectl get pvc -n $NAMESPACE2 -o wide >> $NAMESPACE2/pvc-list.txt
+
+  echo "Gather PV list for $NAMESPACE2 namespace"
+  kubectl get pv -l pod_namespace=$NAMESPACE2 >> $NAMESPACE2/pv-list.txt
+
+  echo "Gather Pod information in the $NAMESPACE2 namespace"
+  kubectl get pods -n $NAMESPACE2 -o wide >> $NAMESPACE2/pod-list.txt
+
+  for POD in $(kubectl get pods -n $NAMESPACE2 -l 'app in (app-proxy, dind, dind-lv-monitor, dind-volume-provisioner, dind-volume-cleanup, runtime, runner, monitor)' --no-headers -o custom-columns=":metadata.name")
   do
     mkdir $NAMESPACE2/$POD
     kubectl get pods $POD -n $NAMESPACE2 -o yaml >> $NAMESPACE2/$POD/get.yaml
     kubectl describe pods $POD -n $NAMESPACE2 >> $NAMESPACE2/$POD/describe.txt
     kubectl logs $POD -n $NAMESPACE2 --all-containers >> $NAMESPACE2/$POD/logs.log
   done
-fi
 
+  runtime_env=$(echo $RUNTIME | sed -e 's/\//-/g') #get runtime label
+
+  echo "Gather PVC information in the $NAMESPACE2 namespace"
+  for PVC in $(kubectl get pvc -n $NAMESPACE2 -l 'codefresh-app=dind' -l runtime_env=$runtime_env --no-headers -o custom-columns=":metadata.name")
+  do
+    mkdir $NAMESPACE2/$PVC
+    kubectl get pvc $PVC -n $NAMESPACE2 -o yaml >> $NAMESPACE2/$PVC/get.yaml
+    kubectl describe pvc $PVC -n $NAMESPACE2 >> $NAMESPACE2/$PVC/describe.txt
+  done
+
+  echo "Gather PV information in the $NAMESPACE2 namespace"
+  for PV in $(kubectl get pv -l 'codefresh-app=dind' -l pod_namespace=$NAMESPACE2 -l runtime_env=$runtime_env --no-headers -o custom-columns=":metadata.name")
+  do
+    mkdir $NAMESPACE2/$PV
+    kubectl get pv $PV -o yaml >> $NAMESPACE2/$PV/get.yaml
+    kubectl describe pv $PV >> $NAMESPACE2/$PV/describe.txt
+  done
+
+fi
 
 # compressing and cleaning up
 echo "Archiving Contents and cleaning up"
