@@ -17,7 +17,7 @@ echo "Exporting Nodes Descriptions"
 kubectl describe nodes >> nodes.txt
 
 # getting RE information
-for RENV in $(codefresh get agents --sc runtimes | grep $RUNTIME)  #| sed -e $'s/,/\\\n/g')
+for RENV in $(codefresh get agents --sc runtimes | grep $RUNTIME)
 do
   NAMESPACE=$(codefresh get runtime-environments $RENV -o json | jq --raw-output '.dockerDaemonScheduler.cluster.namespace')
   mkdir $NAMESPACE
