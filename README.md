@@ -16,7 +16,7 @@ This script is to gather information about the Codefresh Runner (previously Veno
 To begin, you will need to clone the repo, change the directory to this repo, and add execution flag to the script.  Below is the command to do it all in one go.
 
 ```bash
-git clone https://github.com/codefresh-support/hybrid-runner-support && \
+git clone https://github.com/codefresh-support/hybrid-runner-support.git && \
 cd hybrid-runner-support && \
 chmod +x support_package.sh
 ```
