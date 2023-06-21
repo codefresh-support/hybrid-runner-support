@@ -101,7 +101,7 @@ do
   kubectl logs $POD -n $NAMESPACE --timestamps --all-containers >> pods/$POD/logs.log
 done
 
-# cli installation doesn't app `app=dind-volume-cleanup` label into `.spec.jobTemplate.spec.template.metadata`
+# cli installation doesn't add `app=dind-volume-cleanup` label into `.spec.jobTemplate.spec.template.metadata`
 # so had to use `--show-labels` with `grep`
 JOBS=( $(kubectl get job --show-labels -n $NAMESPACE | grep -E 'job-name=dind-volume-cleanup-.*' | awk '{print $1}') )
 for JOB in "${JOBS[@]}"
