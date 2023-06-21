@@ -45,6 +45,8 @@ echo "Getting persistent volume claims..."
 kubectl get persistentvolumeclaim -n $NAMESPACE -o wide > persistentVolumeClaim-list.txt
 echo "Getting pods..."
 kubectl get pods -n $NAMESPACE -o wide > pod-list.txt
+echo "Getting cronjobs..."
+kubectl get cronjob -l app=dind-volume-cleanup -n $NAMESPACE -o yaml > cronjob-out.yaml
 
 echo "Gathering Hybrid Runner Information in $NAMESPACE namespace"
 
@@ -97,6 +99,18 @@ do
   kubectl get pods $POD -n $NAMESPACE -o yaml >> pods/$POD/get.yaml
   kubectl describe pods $POD -n $NAMESPACE >> pods/$POD/describe.txt
   kubectl logs $POD -n $NAMESPACE --timestamps --all-containers >> pods/$POD/logs.log
+done
+
+# cli installation doesn't add `app=dind-volume-cleanup` label into `.spec.jobTemplate.spec.template.metadata`
+# so had to use `--show-labels` with `grep`
+JOBS=( $(kubectl get job --show-labels -n $NAMESPACE | grep -E 'job-name=dind-volume-cleanup-.*' | awk '{print $1}') )
+for JOB in "${JOBS[@]}"
+do
+  WORKDIR=jobs/$JOB
+  mkdir -p $WORKDIR
+  kubectl get job $JOB -n $NAMESPACE -o yaml >> $WORKDIR/get.yaml
+  kubectl describe job $JOB -n $NAMESPACE >> $WORKDIR/describe.txt
+  kubectl logs -l job-name=$JOB -n $NAMESPACE --timestamps --all-containers >> $WORKDIR/logs.log
 done
 
 echo "Archiving Contents and cleaning up"
