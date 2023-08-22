@@ -1,15 +1,15 @@
-# Creating a Support Package for Codefresh Runner
+# Creating a Support Package for Codefresh Hybrid Runtime
 
 ## PreReqs
 
 1. `kubectl config current-context` must be the context of the cluster the runner is located in
-2. [Codefresh CLI](https://codefresh-io.github.io/cli/installation/) must be installed and configured
+2. [Codefresh CLI](https://codefresh-io.github.io/cli/installation/) must be installed and configured for classic runtime
 3. jq (used to gather information)
 4. git (can download a zip version instead)
 
 ## Script Usage
 
-This script is to gather information about the Codefresh Runner (previously Venona) environment.  
+This script is to gather information about the Codefresh Hybrid Runtime for classic and gitops 
 
 ### Setup
 
@@ -24,13 +24,13 @@ chmod +x support_package.sh
 ### Syntax
 
 ```bash
-./support_package.sh <Codefresh_Runtime>
+./support_package.sh 
 ```
 
-The argument is the runtime name. You can run `codefresh get runtime-environments` to get the runtime names.
+Then follow the prompts.
 
 ### Example
 
 ```bash
-./support_package.sh sales-dev-eks/codefresh-runtime
+./support_package.sh
 ```
