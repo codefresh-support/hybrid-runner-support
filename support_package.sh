@@ -78,7 +78,7 @@ gatherClassic () {
     fi
 
     NAMESPACE=$(jq --raw-output '.dockerDaemonScheduler.cluster.namespace' cf-runtime.json)
-    STORAGE_CLASS=$(jq --raw-output .dockerDaemonScheduler.pvcs.dind.storageClassName cf-runtime.json)
+    STORAGE_CLASS=$(jq --raw-output .dockerDaemonScheduler.pvcs.dind.storageClassName cf-runtime.json 2>/dev/null || jq --raw-output '.dockerDaemonScheduler.pvcs[0].storageClassName' cf-runtime.json)
 
     gatherCommon
     gatherAdditional
