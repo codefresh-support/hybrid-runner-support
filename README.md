@@ -1,5 +1,7 @@
 # Creating a Support Package for Codefresh Hybrid Runtime
 
+# Please use https://github.com/codefresh-support/codefresh-support-package as this repo is no longer active.
+
 ## PreReqs
 
 1. `kubectl config current-context` must be the context of the cluster the runner is located in
